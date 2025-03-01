@@ -20,15 +20,12 @@ export default async function Home() {
             Автоматически публикуйте заметки из Obsidian в современном веб-интерфейсе
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/frechezz/obsite" target="_blank" rel="noopener noreferrer">
               <Button className="flex items-center">
                 <FiGithub className="mr-2" />
                 GitHub репозиторий
               </Button>
             </a>
-            <Button variant="outline">
-              Узнать больше
-            </Button>
           </div>
         </div>
       </section>

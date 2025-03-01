@@ -25,11 +25,11 @@ const Footer: React.FC = () => {
           
           <div className="flex items-center space-x-4">
             <Link 
-              href="https://github.com/frechezz/publicobs" 
+              href="https://github.com/frechezz" 
               target="_blank" 
               rel="noopener noreferrer"
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/20 transition-colors"
-              aria-label="GitHub Репозиторий с заметками"
+              aria-label="GitHub профиль"
             >
               <FiGithub className="w-5 h-5" />
             </Link>
