@@ -5,7 +5,7 @@ import matter from 'gray-matter';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
 const GITHUB_OWNER = process.env.GITHUB_OWNER || '';
 const GITHUB_REPO = process.env.GITHUB_REPO || '';
-const NOTES_PATH = process.env.NOTES_PATH || 'notes'; // Путь к директории с заметками
+const NOTES_PATH = process.env.NOTES_PATH || ''; // Путь к директории с заметками теперь корень репозитория
 
 // Проверка наличия необходимых переменных окружения
 const hasGitHubCredentials = GITHUB_TOKEN && GITHUB_OWNER && GITHUB_REPO;
@@ -157,7 +157,7 @@ export async function fetchAllNotes(): Promise<NoteMetadata[]> {
 }
 
 /**
- * Конвертирует Obsidian-синтаксис в обычный Markdown
+ * Конвертирует синтаксис Obsidian в стандартный Markdown
  */
 function convertObsidianToMarkdown(content: string): string {
   // Конвертация Obsidian изображений: ![[image.png]] -> ![image](files/image.png)
@@ -167,16 +167,12 @@ function convertObsidianToMarkdown(content: string): string {
     // Извлекаем имя файла для использования в alt тексте
     const imageName = filename.split('/').pop();
     
-    // Если путь содержит obsidianvault, используем его как есть
-    if (filename.startsWith('obsidianvault/')) {
-      return `![${imageName}](${filename})`;
-    }
-    
-    // Если путь уже содержит директорию, используем его как есть, иначе добавляем files/
+    // Все изображения теперь в папке files внутри репозитория
     const imagePath = filename.includes('/') ? filename : `files/${filename}`;
     
-    // Не нужно вручную кодировать URL здесь, так как это будет сделано в getGitHubImageUrl
-    // и в компоненте img уже есть обработка для этого
+    console.log(`Обрабатываем изображение: ${filename} -> ${imagePath}`);
+    
+    // Возвращаем стандартный markdown для изображения с корректным путем
     return `![${imageName}](${imagePath})`;
   });
 }
@@ -204,7 +200,13 @@ export async function fetchNoteBySlug(slug: string): Promise<NoteContent | null>
   }
 
   try {
-    const filePath = `${NOTES_PATH}/${slug}.md`;
+    // Создаем корректный путь к файлу, избегая проблем с символом "."
+    // Если NOTES_PATH является ".", то просто используем имя файла без префикса
+    const filePath = (NOTES_PATH && NOTES_PATH !== '.') 
+      ? `${NOTES_PATH}/${slug}.md` 
+      : `${slug}.md`;
+    
+    console.log(`Пытаемся получить файл по пути: ${filePath}`);
     
     // Примечание: Если возникает ошибка, возможно, в вашей версии Octokit метод называется getContents
     const { data: fileContent } = await octokit!.rest.repos.getContent({
@@ -241,38 +243,9 @@ export async function fetchNoteBySlug(slug: string): Promise<NoteContent | null>
  * Преобразует URL изображения GitHub в прямую ссылку
  */
 export function getGitHubImageUrl(path: string): string {
-  // Если это уже абсолютный URL, возвращаем его без изменений
-  if (path.startsWith('http')) {
-    return path;
-  }
-  
-  // Если нет учетных данных GitHub, возвращаем путь с закодированными пробелами
-  if (!hasGitHubCredentials) {
-    // Для тестового режима возвращаем URL для тестовых изображений
-    if (path.startsWith('files/')) {
-      const fileName = path.substring(6); // удаляем 'files/'
-      // Возвращаем URL для тестовых изображений - используем несплеш как замену
-      return `https://source.unsplash.com/random/800x600?${encodeURIComponent(fileName)}`;
-    }
-    // Кодируем пробелы в пути, если они еще не закодированы
-    return path.includes(' ') ? encodeURI(path) : path;
-  }
-  
-  // Обрабатываем путь, чтобы он корректно работал с GitHub raw URL
-  // Удаляем начальный слеш, если он есть
-  let cleanPath = path.startsWith('/') ? path.substring(1) : path;
-  
-  // Проверяем, содержит ли путь префикс obsidianvault
-  if (!cleanPath.startsWith('obsidianvault/') && !cleanPath.includes('://')) {
-    // Если путь не начинается с obsidianvault/ и не является URL, добавляем префикс
-    cleanPath = `obsidianvault/${cleanPath}`;
-  }
-  
-  // Используем encodeURI для правильного кодирования пробелов и других специальных символов
-  const encodedPath = encodeURI(cleanPath);
-  
-  // Формируем URL для доступа к "сырым" файлам из GitHub репозитория
-  return `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${encodedPath}`;
+  // Импортируем функцию из imageUtils для совместимости
+  const { getGitHubImageUrl: imageUtilGetGitHubImageUrl } = require('./imageUtils');
+  return imageUtilGetGitHubImageUrl(path);
 }
 
 /**
@@ -285,7 +258,13 @@ export async function checkNoteExists(slug: string): Promise<boolean> {
   }
 
   try {
-    const filePath = `${NOTES_PATH}/${slug}.md`;
+    // Создаем корректный путь к файлу, избегая проблем с символом "."
+    // Если NOTES_PATH является ".", то просто используем имя файла без префикса
+    const filePath = (NOTES_PATH && NOTES_PATH !== '.') 
+      ? `${NOTES_PATH}/${slug}.md` 
+      : `${slug}.md`;
+    
+    console.log(`Проверяем существование файла по пути: ${filePath}`);
     
     // Примечание: Если возникает ошибка, возможно, в вашей версии Octokit метод называется getContents
     await octokit!.rest.repos.getContent({
@@ -296,6 +275,7 @@ export async function checkNoteExists(slug: string): Promise<boolean> {
     
     return true;
   } catch (error) {
+    console.error(`Ошибка при проверке существования заметки ${slug}:`, error);
     return false;
   }
 } 

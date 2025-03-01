@@ -5,7 +5,6 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import rehypeHighlight from 'rehype-highlight';
 import remarkGfm from 'remark-gfm';
-import Image from 'next/image';
 import { getGitHubImageUrl } from '@/lib/imageUtils';
 
 interface NoteRendererProps {
@@ -13,7 +12,7 @@ interface NoteRendererProps {
   className?: string;
 }
 
-const NoteRenderer: React.FC<NoteRendererProps> = ({ content, className = '' }) => {
+const FixedNoteRenderer: React.FC<NoteRendererProps> = ({ content, className = '' }) => {
   // Обработчик ошибок загрузки изображений
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.target as HTMLImageElement;
@@ -33,15 +32,17 @@ const NoteRenderer: React.FC<NoteRendererProps> = ({ content, className = '' }) 
           img: ({ node, src, alt, ...props }) => {
             if (!src) return null;
             
-            // Более надежный способ формирования URL для изображений
+            // Формируем URL для изображений из публичного репозитория
             let imageSrc = src;
             
             try {
-              // Если это не абсолютный URL, обрабатываем его через нашу функцию
+              // Если это не абсолютный URL, обрабатываем его
               if (!src.startsWith('http')) {
                 console.log(`Обработка изображения: исходный путь = ${src}`);
-                // Формируем полный URL к GitHub репозиторию
+                
+                // Используем функцию из imageUtils для формирования корректного URL
                 imageSrc = getGitHubImageUrl(src);
+                
                 console.log(`Обработка изображения: итоговый URL = ${imageSrc}`);
               }
             } catch (error) {
@@ -101,4 +102,4 @@ const NoteRenderer: React.FC<NoteRendererProps> = ({ content, className = '' }) 
   );
 };
 
-export default NoteRenderer; 
+export default FixedNoteRenderer; 
