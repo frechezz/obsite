@@ -6,7 +6,6 @@
 
 🔥 **Автор:** [frechezz](https://github.com/frechezz) | [Телеграм: @peeepaw](https://t.me/peeepaw)  
 📘 **Репозиторий с проектом:** [github.com/frechezz/obsite](https://github.com/frechezz/obsite)  
-📚 **Репозиторий с заметками:** [github.com/frechezz/publicobs](https://github.com/frechezz/publicobs)
 
 ## ✨ Особенности
 
