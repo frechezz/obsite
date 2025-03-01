@@ -244,9 +244,15 @@ export async function fetchNoteBySlug(slug: string): Promise<NoteContent | null>
  * Преобразует URL изображения GitHub в прямую ссылку
  */
 export function getGitHubImageUrl(path: string): string {
-  // Импортируем функцию из imageUtils для совместимости
-  const { getGitHubImageUrl: imageUtilGetGitHubImageUrl } = require('./imageUtils');
-  return imageUtilGetGitHubImageUrl(path);
+  // Import using ES modules instead of require
+  // const { getGitHubImageUrl: imageUtilGetGitHubImageUrl } = require('./imageUtils');
+  // return imageUtilGetGitHubImageUrl(path);
+  
+  // Constructing the GitHub raw URL directly as a temporary fix
+  const owner = process.env.GITHUB_OWNER || 'frechezz';
+  const repo = process.env.NEXT_PUBLIC_IMAGES_REPO || 'publicobs';
+  const branch = 'main';
+  return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
 }
 
 /**
