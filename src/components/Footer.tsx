@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { FiGithub, FiTwitter, FiMail } from 'react-icons/fi';
+import { FiGithub } from 'react-icons/fi';
+import { FaTelegramPlane } from 'react-icons/fa';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -17,36 +18,29 @@ const Footer: React.FC = () => {
                 ObsidianNotes
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                © {currentYear} Все права защищены
+                © {currentYear} Создано <Link href="https://github.com/frechezz" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500 dark:hover:text-blue-400 transition-colors">frechezz</Link>
               </div>
             </div>
           </div>
           
           <div className="flex items-center space-x-4">
             <Link 
-              href="https://github.com" 
+              href="https://github.com/frechezz/publicobs" 
               target="_blank" 
               rel="noopener noreferrer"
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/20 transition-colors"
-              aria-label="GitHub"
+              aria-label="GitHub Репозиторий с заметками"
             >
               <FiGithub className="w-5 h-5" />
             </Link>
             <Link 
-              href="https://twitter.com" 
+              href="https://t.me/peeepaw" 
               target="_blank" 
               rel="noopener noreferrer"
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/20 transition-colors"
-              aria-label="Twitter"
+              aria-label="Telegram"
             >
-              <FiTwitter className="w-5 h-5" />
-            </Link>
-            <Link 
-              href="mailto:example@example.com" 
-              className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/20 transition-colors"
-              aria-label="Email"
-            >
-              <FiMail className="w-5 h-5" />
+              <FaTelegramPlane className="w-5 h-5" />
             </Link>
           </div>
         </div>

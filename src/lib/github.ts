@@ -173,7 +173,8 @@ function convertObsidianToMarkdown(content: string): string {
     console.log(`Обрабатываем изображение: ${filename} -> ${imagePath}`);
     
     // Возвращаем стандартный markdown для изображения с корректным путем
-    return `![${imageName}](${imagePath})`;
+    // Используем encodeURI для правильной обработки пробелов в URL
+    return `![${imageName}](${encodeURI(imagePath)})`;
   });
 }
 

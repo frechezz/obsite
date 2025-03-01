@@ -13,17 +13,43 @@ export function getGitHubImageUrl(path: string): string {
     return path;
   }
   
-  // Формируем URL для доступа к изображению из публичного репозитория
-  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+  // Убираем кодирование URI, если оно уже присутствует
+  let decodedPath = path;
+  try {
+    // Проверяем наличие закодированных символов и декодируем, чтобы избежать двойного кодирования
+    if (path.includes('%')) {
+      decodedPath = decodeURIComponent(path);
+    }
+  } catch (e) {
+    // Если произошла ошибка декодирования, используем исходный путь
+    console.warn('Ошибка декодирования пути:', e);
+  }
   
-  // Закодируем каждую часть пути отдельно для более правильной обработки
-  const pathParts = cleanPath.split('/');
-  const encodedPathParts = pathParts.map(part => encodeURIComponent(part));
-  const encodedPath = encodedPathParts.join('/');
+  // Обрабатываем Obsidian-стиль ссылки ![[filename.png]]
+  const obsidianMatch = decodedPath.match(/!\[\[(.*?)\]\]/);
+  if (obsidianMatch) {
+    path = obsidianMatch[1];
+  } else {
+    path = decodedPath;
+  }
+  
+  // Если путь не содержит '/', и не указана директория files, добавляем ее
+  if (!path.includes('/') && !path.startsWith('files/')) {
+    path = `files/${path}`;
+  }
   
   // Используем переменные окружения для формирования URL
   const owner = process.env.GITHUB_OWNER || 'frechezz';
   const repo = process.env.GITHUB_REPO || 'publicobs';
+  const branch = process.env.GITHUB_BRANCH || 'main';
   
-  return `https://raw.githubusercontent.com/${owner}/${repo}/refs/heads/main/${encodedPath}`;
+  // Формируем корректный URL, добавляя один раз кодирование только для имени файла
+  let url = `https://raw.githubusercontent.com/${owner}/${repo}/refs/heads/${branch}/`;
+  
+  // Разбиваем путь и кодируем каждую часть отдельно
+  const pathParts = path.split('/');
+  const encodedPathParts = pathParts.map(part => encodeURIComponent(part));
+  url += encodedPathParts.join('/');
+  
+  return url;
 }

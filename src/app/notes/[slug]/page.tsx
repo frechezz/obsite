@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Metadata, ResolvingMetadata } from "next";
 import { fetchNoteBySlug, checkNoteExists } from "@/lib/github";
-import FixedNoteRenderer from "@/components/FixedNoteRenderer";
+import NoteRenderer from "@/components/NoteRenderer";
 import Card from "@/components/ui/Card";
 
 interface NotePageProps {
@@ -100,7 +100,7 @@ export default async function NotePage({ params }: NotePageProps) {
           </header>
 
           <Card className="p-8">
-            <FixedNoteRenderer content={content} />
+            <NoteRenderer content={content} />
           </Card>
         </article>
       </div>

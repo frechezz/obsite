@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import rehypeHighlight from 'rehype-highlight';
@@ -23,6 +23,42 @@ const NoteRenderer: React.FC<NoteRendererProps> = ({ content, className = '' }) 
     img.style.border = '1px dashed #ff5555';
     img.style.backgroundColor = '#fff1f1';
   };
+
+  // Предварительно обрабатываем контент для поиска и замены Obsidian-синтаксиса
+  const processedContent = useMemo(() => {
+    // Регулярное выражение для поиска Obsidian-синтаксиса изображений
+    const obsidianImageRegex = /!\[\[(.*?)\]\]/g;
+    
+    // Регулярное выражение для поиска стандартного markdown синтаксиса с незакодированными пробелами
+    const standardImageRegex = /!\[(.*?)\]\((.*?)\)/g;
+    
+    // Сначала заменяем Obsidian-синтаксис на стандартный markdown
+    let result = content.replace(obsidianImageRegex, (match, filename) => {
+      // Извлекаем имя файла для alt-текста
+      const imageName = filename.split('/').pop() || filename;
+      // Предполагаем, что все изображения находятся в папке files, если не указан полный путь
+      const imagePath = filename.includes('/') ? filename : `files/${filename}`;
+      
+      console.log(`Преобразовано изображение: ${match} -> ${imagePath}`);
+      
+      // Создаем корректную markdown ссылку с закодированным URL
+      // Кодируем только путь, не alt-текст
+      return `![${imageName}](${encodeURI(imagePath)})`;
+    });
+    
+    // Затем проверяем стандартные markdown ссылки и исправляем URL с пробелами
+    result = result.replace(standardImageRegex, (match, altText, url) => {
+      // Если URL уже содержит %20 или другие закодированные символы, оставляем как есть
+      if (url.includes('%')) {
+        return match;
+      }
+      
+      // Иначе кодируем URL для безопасного использования
+      return `![${altText}](${encodeURI(url)})`;
+    });
+    
+    return result;
+  }, [content]);
 
   return (
     <div className={`prose prose-lg dark:prose-invert max-w-none ${className}`}>
@@ -95,7 +131,7 @@ const NoteRenderer: React.FC<NoteRendererProps> = ({ content, className = '' }) 
           ),
         }}
       >
-        {content}
+        {processedContent}
       </ReactMarkdown>
     </div>
   );
